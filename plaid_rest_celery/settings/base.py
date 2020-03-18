@@ -31,8 +31,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # extending user model
+    'users',
+
     # third-parties
     'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',  # REST implementation of Django authentication system
 ]
 
 MIDDLEWARE = [
@@ -120,3 +125,6 @@ REST_FRAMEWORK = {
     # Default exception handler
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler'
 }
+
+# Custom user
+AUTH_USER_MODEL = 'users.User'

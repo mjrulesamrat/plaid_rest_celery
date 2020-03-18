@@ -10,6 +10,7 @@ django = "==2.*"
 djangorestframework = "*"
 markdown = "*"
 django-filter = "*"
+djoser = "*"
 
 [requires]
 python_version = "3.6"
