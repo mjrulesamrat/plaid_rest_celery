@@ -6,7 +6,7 @@ SECRET_KEY = 'sherlocked'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Database
@@ -18,3 +18,8 @@ DATABASES = {
         'NAME': os.path.join(PROJECT_ROOT, 'db.sqlite3'),
     }
 }
+
+
+TIME_ZONE = 'Asia/Calcutta'
+
+USE_TZ = True
