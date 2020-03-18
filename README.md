@@ -65,6 +65,11 @@ localhost:8000/api/v1/docs/
 
 ```
 docker-compose -f docker-compose.rabbitmq.yml up -d
+
+# If connection is refused despite right credenials
+docker exec -it container_id sh
+rabbitmqctl list_users | grep user
+rabbitmqctl change_password guest password  # reset password
 ```
 
 - start celery worker
