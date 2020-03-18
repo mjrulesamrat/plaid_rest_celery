@@ -16,8 +16,27 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Plaid integration with REST and celery",
+      default_version='v1',
+      description="Few crazy out there who are willing to change the world will change it",
+      terms_of_service="",
+      contact=openapi.Contact(email="mjrulesamrat@gmail.com"),
+      license=openapi.License(name=""),
+   ),
+   public=False,
+   permission_classes=(permissions.IsAdminUser,),
+)
+
 urlpatterns = [
-    path('placid-admin/', admin.site.urls),
+    path('plaid-admin/', admin.site.urls),
     path('api/v1/', include('djoser.urls')),
     path('api/v1/auth/', include('djoser.urls.authtoken')),
+    path('api/v1/docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

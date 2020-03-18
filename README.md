@@ -45,3 +45,16 @@ python manage.py migrate
 ```
 python manage.py runserver
 ```
+
+## Admin panel
+
+```
+localhost:8000/plaid-admin/
+```
+
+## API docs using [drf-yasg](https://drf-yasg.readthedocs.io/en/latest/readme.html)
+
+- You'll need to login to admin panel first to access API docs
+```
+localhost:8000/api/v1/docs/
+```

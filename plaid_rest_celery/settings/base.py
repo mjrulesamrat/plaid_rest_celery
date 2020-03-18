@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',  # REST implementation of Django authentication system
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
