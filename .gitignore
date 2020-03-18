@@ -3,3 +3,9 @@ Pipfile.lock
 
 ### Editor ###
 .idea/
+
+### local settings ###
+plaid_rest_celery/settings/local.py
+
+### database ###
+db.sqlite3
