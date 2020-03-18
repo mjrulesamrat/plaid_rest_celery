@@ -12,6 +12,7 @@ markdown = "*"
 django-filter = "*"
 djoser = "*"
 drf-yasg = "*"
+celery = "*"
 
 [requires]
 python_version = "3.6"

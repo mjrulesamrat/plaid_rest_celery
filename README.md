@@ -58,3 +58,11 @@ localhost:8000/plaid-admin/
 ```
 localhost:8000/api/v1/docs/
 ```
+
+## Celery local setup
+
+- start celery worker
+
+```
+celery -A plaid_rest_celery worker --loglevel=info
+```

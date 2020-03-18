@@ -9,3 +9,6 @@ plaid_rest_celery/settings/local.py
 
 ### database ###
 db.sqlite3
+
+### environment files ###
+.env
