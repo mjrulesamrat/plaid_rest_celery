@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  rabbitmq:
+    container_name: plaid_rabbitmq
+    hostname: rabbitmq
+    image: rabbitmq:3.8-management
+    env_file:
+      - ./.env.rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672  # here, we can access rabbitmq management plugin
+    restart: on-failure

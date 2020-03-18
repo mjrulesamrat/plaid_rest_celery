@@ -61,6 +61,12 @@ localhost:8000/api/v1/docs/
 
 ## Celery local setup
 
+- Start rabbitmq docker (Change user and password at .env.rabbitmq)
+
+```
+docker-compose -f docker-compose.rabbitmq.yml up -d
+```
+
 - start celery worker
 
 ```
