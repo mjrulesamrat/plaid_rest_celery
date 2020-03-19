@@ -42,4 +42,5 @@ urlpatterns = [
     path('api/v1/plaid/', include('plaidapp.urls'), name='plaid'),
 
     path('api/v1/docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('', include('django_prometheus.urls')),
 ]

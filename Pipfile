@@ -20,6 +20,7 @@ django-extensions = "*"
 django-structlog = "*"
 sentry-sdk = "*"
 psycopg2 = "*"
+django-prometheus = "*"
 
 [requires]
 python_version = "3.6"
