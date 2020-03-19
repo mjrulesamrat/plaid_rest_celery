@@ -32,6 +32,10 @@ pipenv shell
 
 ```
 cp plaid_rest_celery/settings/example-staging.py plaid_rest_celery/settings/staging.py
+
+cp .env.example .env
+
+# change user and password at .env.rabbitmq
 ```
 
 - Run migrations
