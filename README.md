@@ -77,3 +77,9 @@ rabbitmqctl change_password guest password  # reset password
 ```
 celery -A plaid_rest_celery worker --loglevel=info
 ```
+
+## Update requirements for staging
+
+Update requirements from Pipfile to `requirements.txt`. Everytime we do `pipenv install`, make sure to update `requirements.txt`
+
+    pipenv lock -r > requirements.txt
