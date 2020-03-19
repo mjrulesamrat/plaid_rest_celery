@@ -2,6 +2,22 @@
 
 "Few crazy out there who are willing to change the world will change it"
 
+## TLDR;
+
+```
+git clone git@github.com:mjrulesamrat/plaid_rest_celery.git
+
+cd plaid_rest_celery
+
+chmod +x app/entrypoint.sh
+
+docker-compose up -d --build
+
+docker-compose exec web python manage.py migrate --noinput
+
+docker-compose exec web python manage.py collectstatic --noinput
+```
+
 ## Local Installation Guideline:
 
 - Clone repository
@@ -73,7 +89,7 @@ docker-compose -f docker-compose.rabbitmq.yml up -d
 # If connection is refused despite right credenials
 docker exec -it container_id sh
 rabbitmqctl list_users | grep user
-rabbitmqctl change_password guest password  # reset password
+rabbitmqctl change_password user password  # reset password
 ```
 
 - start celery worker

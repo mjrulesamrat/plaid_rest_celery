@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  rabbitmq:
+    container_name: plaid_rabbitmq
+    hostname: rabbitmq
+    image: rabbitmq:3.8.2-management
+    env_file:
+      - ./.env
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # here, we can access rabbitmq management plugin
+    restart: on-failure
+
+  web: &web
+    build:
+      context: ./.
+      dockerfile: Dockerfile
+    container_name: plaid_django
+    command: gunicorn plaid_rest_celery.wsgi:application --bind 0.0.0.0:8000
+    image: plaid_rest_image
+    volumes:
+      - static_volume:/home/plaid/web/assets
+    expose:
+      - "8000"
+    env_file:
+      - ./.env
+    restart: on-failure
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/plaid/web/assets
+    ports:
+      - "7777:80"
+    depends_on:
+      - web
+    restart: on-failure
+
+  celery_worker:
+    <<: *web
+    command: celery -A plaid_rest_celery worker -l info
+    container_name: plaid_celery_worker
+    image: plaid_rest_image
+    depends_on:
+      - web
+      - rabbitmq
+    restart: always
+
+volumes:
+  static_volume:

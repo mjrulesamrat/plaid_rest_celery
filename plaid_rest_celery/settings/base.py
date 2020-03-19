@@ -105,6 +105,7 @@ USE_L10N = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = 'assets'
 
 # django-rest-framework configurations
 REST_FRAMEWORK = {
