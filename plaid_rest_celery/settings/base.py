@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',  # REST implementation of Django authentication system
     'drf_yasg',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -134,3 +135,5 @@ REST_FRAMEWORK = {
 
 # Custom user
 AUTH_USER_MODEL = 'users.User'
+
+CELERY_RESULT_BACKEND = 'django-db'
