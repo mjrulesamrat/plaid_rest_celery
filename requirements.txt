@@ -23,6 +23,7 @@ kombu==4.6.8
 markdown==3.2.1
 markupsafe==1.1.1
 packaging==20.3
+plaid-python==3.7.0
 pyparsing==2.4.6
 pytz==2019.3
 requests==2.23.0

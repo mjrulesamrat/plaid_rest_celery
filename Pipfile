@@ -15,6 +15,7 @@ drf-yasg = "*"
 celery = "*"
 gunicorn = "*"
 django-celery-results = "*"
+plaid-python = "*"
 
 [requires]
 python_version = "3.6"

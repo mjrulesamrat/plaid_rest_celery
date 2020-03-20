@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'djoser',  # REST implementation of Django authentication system
     'drf_yasg',
     'django_celery_results',
+
+    # local apps
+    'plaidapp',
 ]
 
 MIDDLEWARE = [

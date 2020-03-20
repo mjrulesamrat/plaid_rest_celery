@@ -40,3 +40,10 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 
 CELERY_ENABLE_UTC = False
 CELERY_TIMEZONE = os.environ.get("TIME_ZONE", "Asia/Calcutta")
+
+# Plaid configurations
+PLAID_CLIENT_ID = os.getenv('PLAID_CLIENT_ID')
+PLAID_SECRET = os.getenv('PLAID_SECRET')
+PLAID_PUBLIC_KEY = os.getenv('PLAID_PUBLIC_KEY')
+PLAID_ENV = os.getenv('PLAID_ENV', 'sandbox')
+PLAID_COUNTRY_CODES = os.getenv('PLAID_COUNTRY_CODES', 'US,CA,GB,FR,ES')
