@@ -16,6 +16,7 @@ celery = "*"
 gunicorn = "*"
 django-celery-results = "*"
 plaid-python = "*"
+django-extensions = "*"
 
 [requires]
 python_version = "3.6"

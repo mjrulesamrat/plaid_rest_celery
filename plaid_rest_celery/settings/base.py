@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'djoser',  # REST implementation of Django authentication system
     'drf_yasg',
     'django_celery_results',
+    'django_extensions',
 
     # local apps
     'plaidapp',
