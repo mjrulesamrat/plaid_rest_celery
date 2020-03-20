@@ -7,6 +7,7 @@ from plaid import Client
 
 class ObtainAccessTokenView(CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = [u'post']
 
     def post(self, request, *args, **kwargs):
         client = Client(
@@ -20,6 +21,7 @@ class ObtainAccessTokenView(CreateAPIView):
 
 class TransactionListView(ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = [u'get']
     # define serializer for transactions data
 
     def get_queryset(self):
