@@ -18,6 +18,7 @@ django-celery-results = "*"
 plaid-python = "*"
 django-extensions = "*"
 django-structlog = "*"
+sentry-sdk = "*"
 
 [requires]
 python_version = "3.6"
