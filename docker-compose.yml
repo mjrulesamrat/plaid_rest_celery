@@ -37,10 +37,30 @@ services:
       - web
     restart: on-failure
 
-  celery_worker:
+  celery_flash_worker:
     <<: *web
-    command: celery -A plaid_rest_celery worker -l info
-    container_name: plaid_celery_worker
+    command: celery -A plaid_rest_celery worker -Q flash -c 2 --loglevel=info
+    container_name: plaid_flash_worker
+    image: plaid_rest_image
+    depends_on:
+      - web
+      - rabbitmq
+    restart: always
+
+  celery_default_worker:
+    <<: *web
+    command: celery -A plaid_rest_celery worker -Q normal -c 2 --loglevel=info
+    container_name: plaid_default_worker
+    image: plaid_rest_image
+    depends_on:
+      - web
+      - rabbitmq
+    restart: always
+
+  celery_slow_worker:
+    <<: *web
+    command: celery -A plaid_rest_celery worker -Q slow -c 4 --loglevel=info
+    container_name: plaid_slow_worker
     image: plaid_rest_image
     depends_on:
       - web

@@ -11,6 +11,9 @@ cd plaid_rest_celery
 
 chmod +x app/entrypoint.sh
 
+# most of default should work fine for quick demo except plaid keys & sentry
+cp .env.example .env
+
 docker-compose up -d --build
 
 docker-compose exec web python manage.py migrate --noinput
@@ -86,16 +89,18 @@ localhost:8000/api/v1/docs/
 ```
 docker-compose -f docker-compose.rabbitmq.yml up -d
 
-# If connection is refused despite right credenials
+# If connection is refused despite right credenials. Troubleshoot with below commands.
 docker exec -it container_id sh
 rabbitmqctl list_users | grep user
 rabbitmqctl change_password user password  # reset password
 ```
 
-- start celery worker
+- start celery workers (Three workers with different queues)
 
 ```
-celery -A plaid_rest_celery worker --loglevel=info
+celery -A plaid_rest_celery worker -Q flash -c 4 --loglevel=info
+celery -A plaid_rest_celery worker -Q normal -c 2 --loglevel=info
+celery -A plaid_rest_celery worker -Q slow -c 2 --loglevel=info
 ```
 
 ## Update requirements for staging
@@ -104,11 +109,6 @@ Update requirements from Pipfile to `requirements.txt`. Everytime we do `pipenv 
 
     pipenv lock -r > requirements.txt
 
-## Struct Log
+## Logging
 
-```
-import structlog
-logger = structlog.get_logger("plaid")
-
-logger.log("message here", plaid_request_id=res['request_id'])
-```
+- Go to logs [README](logs/README.md)

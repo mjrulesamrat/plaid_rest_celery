@@ -77,7 +77,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'plaid_rest_celery.wsgi.application'
 
-
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
 
@@ -96,7 +95,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
@@ -106,6 +104,7 @@ USE_I18N = True
 
 USE_L10N = True
 
+APPEND_SLASH = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
@@ -141,7 +140,26 @@ REST_FRAMEWORK = {
 # Custom user
 AUTH_USER_MODEL = 'users.User'
 
+# Celery configurations
 CELERY_RESULT_BACKEND = 'django-db'
+
+CELERYD_HIJACK_ROOT_LOGGER = False
+
+CELERY_TASK_CREATE_MISSING_QUEUES = True
+
+from kombu import Queue, Exchange
+
+CELERY_QUEUES = (
+    Queue('flash', Exchange('flash'), routing_key='flash'),
+    Queue('normal', Exchange('normal'), routing_key='normal'),
+    Queue('slow', Exchange('slow'), routing_key='slow'),
+)
+
+CELERY_DEFAULT_QUEUE = 'normal'
+CELERY_DEFAULT_EXCHANGE = 'normal'
+CELERY_DEFAULT_ROUTING_KEY = 'normal'
+
+# ToDo: Add routing for tasks, once tasks completes
 
 import structlog
 
@@ -187,6 +205,10 @@ LOGGING = {
             "handlers": ["console", "flat_line_file", "json_file"],
             "level": "INFO",
         },
+        "celery": {
+            "handlers": ["flat_line_file"],
+            "level": "ERROR"
+        }
     }
 }
 
