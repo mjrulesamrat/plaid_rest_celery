@@ -82,7 +82,10 @@ class Account(TimeStampedModel):
 
 
 class Balance(TimeStampedModel):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE,
+        related_name="balances"
+    )
     current = models.DecimalField(
         max_digits=18,
         decimal_places=2,

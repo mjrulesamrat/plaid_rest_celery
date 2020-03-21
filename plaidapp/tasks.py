@@ -9,7 +9,7 @@ from plaid.errors import APIError, RateLimitExceededError, PlaidError
 
 from plaid_rest_celery.celery import plaid_app
 from .utils import get_plaid_client
-from .models import PlaidItem, ItemMetaData, Account
+from .models import PlaidItem, ItemMetaData, Account, Balance
 
 celery_logger = structlog.get_logger("celery")
 
@@ -52,6 +52,7 @@ def fetch_item_metadata(self, item_uuid):
             plaid_request_id=item_response['request_id'],
             fetch_item="success"
         )
+        return "Fetch Item meta-data success"
     except PlaidError as exc:
         # logging error
         celery_logger.info(
@@ -89,12 +90,36 @@ def fetch_accounts_data(self, item_uuid):
     client = get_plaid_client()
     try:
         item = PlaidItem.objects.get(identifier=item_uuid)
+
         accounts_response = client.Accounts.get(item.access_token)
+        for account in accounts_response["accounts"]:
+            account_obj = Account(
+                account_id=account["account_id"],
+                mask=account["mask"],
+                name=account["name"],
+                official_name=account["official_name"],
+                type=account.get("type", ""),
+                subtype=account.get("subtype", "")
+            )
+            account_obj.save()
+
+            balance_data = account["balances"]
+            balance_obj = Balance(
+                current=balance_data["current"],
+                available=balance_data.get("available", ""),
+                limit=balance_data.get("limit"),
+                iso_currency_code=balance_data["iso_currency_code"],
+                unofficial_currency_code=balance_data.get("unofficial_currency_code", "")
+            )
+            balance_obj.save()
+
+        # Log event
         celery_logger.log(
             "fetch_accounts_data success",
             plaid_request_id=accounts_response['request_id'],
             fetch_accounts="success"
         )
+        return "Fetch account data success"
     except PlaidError as exc:
         celery_logger.info(
             exc.display_message,
