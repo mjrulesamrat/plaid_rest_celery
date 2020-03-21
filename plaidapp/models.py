@@ -29,6 +29,7 @@ class PlaidItem(TimeStampedModel):
 
 
 class ItemMetaData(TimeStampedModel):
+    # ToDo: Add error jsonfield, ignoring because of sqlite
     identifier = models.UUIDField(
         default=uuid.uuid4, editable=False, unique=True
     )
@@ -37,15 +38,15 @@ class ItemMetaData(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    institution_name = models.CharField(max_length=100)
+    item_meta_id = models.CharField(max_length=100)
     institution_id = models.CharField(max_length=100)
-    webhook = models.CharField(max_length=256)
+    webhook = models.CharField(max_length=256, blank=True, null=True)
     last_successful_update = models.DateTimeField(null=True, blank=True)
     last_failed_update = models.DateTimeField(null=True, blank=True)
     webhook_last_sent_at = models.DateTimeField(null=True, blank=True)
     webhook_last_code_sent = models.CharField(max_length=50, null=True, blank=True)
-    # billed_products
-    # available_products
+    billed_products = models.CharField(max_length=200)
+    available_products = models.CharField(max_length=200)
 
     class Meta:
         verbose_name = "Item Metadata"

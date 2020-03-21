@@ -9,7 +9,7 @@ class PlaidItemAdmin(admin.ModelAdmin):
 
 class ItemMetaAdmin(admin.ModelAdmin):
     list_display = (
-        "identifier", "institution_name",
+        "identifier", "item_id",
         "last_successful_update", "webhook_last_code_sent"
     )
 
