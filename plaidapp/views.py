@@ -13,9 +13,11 @@ import structlog
 
 from .forms import PublicTokenForm
 from .models import PlaidItem
+from .tasks import fetch_item_metadata, fetch_accounts_data
 
 
-logger = structlog.get_logger("plaid")
+plaid_logger = structlog.get_logger("plaid")
+celery_logger = structlog.get_logger("celery")
 
 
 class ObtainAccessTokenView(APIView):
@@ -35,35 +37,45 @@ class ObtainAccessTokenView(APIView):
             try:
                 public_token = form.cleaned_data["public_token"]
                 exchange_response = client.Item.public_token.exchange(public_token)
-                logger.info(
+                plaid_logger.info(
                     "public-token exchange success",
                     plaid_request_id=exchange_response['request_id'],
                     token_exchange="success"
                 )
             except PlaidError as e:
-                logger.info(e.display_message,
-                            public_token=form.cleaned_data["public_token"],
-                            token_exchange="fail",
-                            error_type=e.type,
-                            error_code=e.code,
-                            plaid_request_id=e.request_id)
+                plaid_logger.info(
+                    e.display_message,
+                    public_token=form.cleaned_data["public_token"],
+                    token_exchange="fail",
+                    error_type=e.type,
+                    error_code=e.code,
+                    plaid_request_id=e.request_id
+                )
                 data = {"message": e.display_message}
                 return Response(data, status=400)
 
-            PlaidItem.objects.create(
+            plaid_item = PlaidItem(
                 access_token=exchange_response['access_token'],
                 item_id=exchange_response['item_id'],
                 user=request.user
             )
-            logger.info("new item create success",
-                        plaid_request_id=exchange_response['request_id'],
-                        item_create="success")
+            plaid_item.save()
+
+            # add tasks to fetch item metadata and account data
+            try:
+                fetch_item_metadata.apply_async(plaid_item.identifier)
+            except fetch_item_metadata.OperationalError as exc:
+                celery_logger.exception('Sending task raised %r', exc)
+
+            plaid_logger.info("new item create success",
+                              plaid_request_id=exchange_response['request_id'],
+                              item_create="success")
             return Response({
                 "message": "Account added successfully.",
                 "success": True,
             }, status=201)
         else:
-            logger.info("invalid public-token provided")
+            plaid_logger.info("invalid public-token provided")
             errors = form.errors
             return Response({
                 "message": "Validation failed.",

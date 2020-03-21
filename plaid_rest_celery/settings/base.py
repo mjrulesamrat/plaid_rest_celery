@@ -159,7 +159,12 @@ CELERY_DEFAULT_QUEUE = 'normal'
 CELERY_DEFAULT_EXCHANGE = 'normal'
 CELERY_DEFAULT_ROUTING_KEY = 'normal'
 
-# ToDo: Add routing for tasks, once tasks completes
+# CELERY ROUTES
+CELERY_ROUTES = {
+    'plaidapp.tasks.fetch_item_metadata': {'queue': 'flash'},
+    'plaidapp.tasks.fetch_accounts_data': {'queue': 'normal'},
+    'plaidapp.tasks.fetch_transactions': {'queue': 'slow'},
+}
 
 import structlog
 
