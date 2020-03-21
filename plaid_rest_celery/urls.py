@@ -38,5 +38,8 @@ urlpatterns = [
     path('plaid-admin/', admin.site.urls),
     path('api/v1/', include('djoser.urls')),
     path('api/v1/auth/', include('djoser.urls.authtoken')),
+
+    path('api/v1/plaid/', include('plaidapp.urls'), name='plaid'),
+
     path('api/v1/docs/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
