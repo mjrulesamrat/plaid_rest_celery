@@ -17,6 +17,7 @@ gunicorn = "*"
 django-celery-results = "*"
 plaid-python = "*"
 django-extensions = "*"
+django-structlog = "*"
 
 [requires]
 python_version = "3.6"

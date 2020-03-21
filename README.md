@@ -103,3 +103,12 @@ celery -A plaid_rest_celery worker --loglevel=info
 Update requirements from Pipfile to `requirements.txt`. Everytime we do `pipenv install`, make sure to update `requirements.txt`
 
     pipenv lock -r > requirements.txt
+
+## Struct Log
+
+```
+import structlog
+logger = structlog.get_logger("plaid")
+
+logger.log("message here", plaid_request_id=res['request_id'])
+```
