@@ -56,15 +56,65 @@ class ItemMetaData(TimeStampedModel):
 
 
 class Account(TimeStampedModel):
+    identifier = models.UUIDField(
+        default=uuid.uuid4, editable=False, unique=True
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
+    account_id = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
+    official_name = models.CharField(max_length=200, blank=True, null=True)
+    type = models.CharField(max_length=30)
+    subtype = models.CharField(max_length=30)
+    verification_status = models.CharField(max_length=50)
+    mask = models.CharField(max_length=10, blank=True, null=True)
+    # balance reverse fk
+
+    def __str__(self):
+        return "%s - %s - %s" % (self.type, self.user, self.official_name)
+
+    class Meta:
+        verbose_name = "Plaid Account"
+        verbose_name_plural = "Plaid Accounts"
+
+
+class Balance(TimeStampedModel):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    current = models.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        verbose_name="Current amount",
+    )
+    available = models.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        blank=True, null=True,
+        verbose_name="Available amount",
+    )
+    limit = models.DecimalField(
+        max_digits=18,
+        decimal_places=2,
+        blank=True, null=True,
+        verbose_name="Limit",
+    )
+    iso_currency_code = models.CharField(max_length=10)
+    unofficial_currency_code = models.CharField(
+        max_length=20, blank=True, null=True
+    )
+
+    class Meta:
+        verbose_name = "Account Balance"
+        verbose_name_plural = "Account Balances"
+
+    def __str__(self):
+        return "%s %s" % (self.current, self.iso_currency_code)
 
 
 class Transaction(TimeStampedModel):
     transaction_id = models.CharField(max_length=50)
-    account_id = models.CharField(max_length=50)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE,)
     # location
     # category
     category_id = models.CharField(max_length=25)
@@ -82,8 +132,9 @@ class Transaction(TimeStampedModel):
     transaction_code = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
+        ordering = ['-date', '-created']
         verbose_name = "Transaction"
         verbose_name_plural = "Transactions"
 
     def __str__(self):
-        return self.name
+        return "%s %s" % (self.name, self.transaction_type)
