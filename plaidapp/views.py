@@ -13,7 +13,7 @@ import structlog
 
 from .forms import PublicTokenForm
 from .models import PlaidItem, Transaction
-from .tasks import fetch_item_metadata, fetch_accounts_data
+from .tasks import fetch_item_metadata, fetch_accounts_data, fetch_transactions
 from .serializers import TransactionsSerializer
 
 
@@ -76,6 +76,13 @@ class ObtainAccessTokenView(APIView):
                         request.user.id,
                         plaid_item.identifier,
                     ]
+                )
+
+                fetch_transactions.apply_async(
+                    args=[
+                        plaid_item.identifier,
+                    ],
+                    countdown=20
                 )
             except fetch_item_metadata.OperationalError as exc:
                 celery_logger.exception('Sending task raised %r', exc)

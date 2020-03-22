@@ -150,7 +150,7 @@ CELERY_TASK_CREATE_MISSING_QUEUES = True
 # CELERY ROUTES
 CELERY_TASK_ROUTES = {
     'plaidapp.tasks.fetch_item_metadata': {'queue': 'flash'},
-    'plaidapp.tasks.fetch_accounts_data': {'queue': 'normal'},
+    'plaidapp.tasks.fetch_accounts_data': {'queue': 'default'},
     'plaidapp.tasks.fetch_transactions': {'queue': 'slow'},
 }
 

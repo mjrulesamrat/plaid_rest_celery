@@ -99,7 +99,7 @@ rabbitmqctl change_password user password  # reset password
 
 ```
 celery -A plaid_rest_celery worker -Q flash -c 4 --loglevel=info
-celery -A plaid_rest_celery worker -Q normal -c 2 --loglevel=info
+celery -A plaid_rest_celery worker -Q default -c 2 --loglevel=info
 celery -A plaid_rest_celery worker -Q slow -c 2 --loglevel=info
 ```
 

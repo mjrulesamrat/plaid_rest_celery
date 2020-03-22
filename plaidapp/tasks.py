@@ -10,7 +10,7 @@ from plaid.errors import APIError, RateLimitExceededError, PlaidError
 
 from plaid_rest_celery.celery import plaid_app
 from .utils import get_plaid_client
-from .models import PlaidItem, ItemMetaData, Account, Balance
+from .models import PlaidItem, ItemMetaData, Account, Balance, Transaction
 
 celery_logger = structlog.get_logger("celery")
 
@@ -38,11 +38,11 @@ def fetch_item_metadata(self, user_id, item_uuid):
         item_meta_data_obj = ItemMetaData(
             user=user,
             item=item,
-            available_products=", ".join(item_data.get("available_products")),
-            billed_products=", ".join(item_data.get("billed_products")),
+            available_products=", ".join(item_data.get("available_products", "")),
+            billed_products=", ".join(item_data.get("billed_products", "")),
             item_meta_id=item_data.get("item_id"),
             institution_id=item_data.get("institution_id"),
-            webhook=item_data.get("webhook", ""),
+            webhook=item_data.get("webhook", None),
             last_successful_update=status_data.get("last_successful_update"),
             last_failed_update=status_data.get("last_failed_update"),
         )
@@ -99,26 +99,29 @@ def fetch_accounts_data(self, user_id, item_uuid):
         item = PlaidItem.objects.get(identifier=item_uuid)
 
         accounts_response = client.Accounts.get(item.access_token)
+
         for account in accounts_response["accounts"]:
-            account_obj = Account(
+            # Handle appropriate filters before using get_or_create
+            account_obj, created = Account.objects.get_or_create(
                 user=user,
                 item=item,
                 account_id=account["account_id"],
                 mask=account["mask"],
                 name=account["name"],
                 official_name=account["official_name"],
-                type=account.get("type", ""),
-                subtype=account.get("subtype", "")
+                type=account.get("type", None),
+                subtype=account.get("subtype", None)
             )
             account_obj.save()
 
             balance_data = account["balances"]
             balance_obj = Balance(
+                account=account_obj,
                 current=balance_data["current"],
-                available=balance_data.get("available", ""),
+                available=balance_data.get("available", None),
                 limit=balance_data.get("limit"),
                 iso_currency_code=balance_data["iso_currency_code"],
-                unofficial_currency_code=balance_data.get("unofficial_currency_code", "")
+                unofficial_currency_code=balance_data.get("unofficial_currency_code", None)
             )
             balance_obj.save()
 
@@ -153,11 +156,49 @@ def fetch_transactions(self, item_uuid):
     end_date = '{:%Y-%m-%d}'.format(timezone.now())
     try:
         item = PlaidItem.objects.get(identifier=item_uuid)
-        transactions_response = client.Transactions.get(
-            item.access_token, start_date, end_date
+        transactions_response = client.Transactions.get(item.access_token, start_date, end_date)
+        transactions_data = transactions_response["transactions"]
+        for transaction in transactions_data:
+            account_obj = Account.objects.get(account_id=transaction["account_id"])
+            trans_obj = Transaction(
+                account=account_obj,
+                transaction_id=transaction["transaction_id"],
+                category_id=transaction.get("category_id", None),
+                transaction_type=transaction["transaction_type"],
+                name=transaction["name"],
+                amount=transaction["amount"],
+                iso_currency_code=transaction.get("iso_currency_code", None),
+                unofficial_currency_code=transaction.get("unofficial_currency_code", None),
+                date=transaction["date"],
+                authorized_date=transaction.get("authorized_date", None),
+                payment_channel=transaction["payment_channel"],
+                pending=transaction["pending"],
+                pending_transaction_id=transaction.get("pending_transaction_id", None),
+                account_owner=transaction.get("account_owner", None),
+                transaction_code=transaction.get("transaction_code", None),
+            )
+            trans_obj.save()
+
+        # Log event
+        celery_logger.info(
+            "fetch_transactions success",
+            plaid_request_id=transactions_response['request_id'],
+            fetch_transactions="success"
         )
+        return "Fetch account data success"
 
     except PlaidError as exc:
+        if exc.code == "PRODUCT_NOT_READY":
+            # try again after few minutes because transactions data is not ready
+            celery_logger.info(
+                "fetch_transaction failed",
+                token_exchange="fail",
+                error_type=exc.type,
+                error_code=exc.code,
+                plaid_request_id=exc.request_id
+            )
+            raise self.self.retry(countdown=60*4, exc=exc)
+
         celery_logger.info(
             exc.display_message,
             token_exchange="fail",
@@ -165,4 +206,4 @@ def fetch_transactions(self, item_uuid):
             error_code=exc.code,
             plaid_request_id=exc.request_id
         )
-        raise self.retry(countdown=60*4, exc=exc)
+        raise self.retry(countdown=60*5, exc=exc)
