@@ -26,7 +26,7 @@ TIME_ZONE = 'Asia/Calcutta'
 USE_TZ = True
 
 # celery and broker configurations
-BROKER_USER = os.environ.get("BROKER_USER", "user")
+BROKER_USER = os.environ.get("BROKER_USER", "plaidrabbitadmin")
 BROKER_PASSWORD = os.environ.get("BROKER_PASSWORD", "password")
 BROKER_HOST = os.environ.get("BROKER_HOST", "0.0.0.0")
 BROKER_PORT = os.environ.get("BROKER_PORT", "5672")
