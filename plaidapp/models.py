@@ -118,6 +118,10 @@ class Balance(TimeStampedModel):
 
 
 class Transaction(TimeStampedModel):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
     transaction_id = models.CharField(max_length=50)
     account = models.ForeignKey(Account, on_delete=models.CASCADE,)
     # location

@@ -12,9 +12,9 @@ from plaid import Client
 import structlog
 
 from .forms import PublicTokenForm
-from .models import PlaidItem, Transaction
+from .models import PlaidItem, Account, Transaction
 from .tasks import fetch_item_metadata, fetch_accounts_data, fetch_transactions
-from .serializers import TransactionsSerializer
+from .serializers import TransactionsSerializer, AccountSerializer
 
 
 plaid_logger = structlog.get_logger("plaid")
@@ -80,6 +80,7 @@ class ObtainAccessTokenView(APIView):
 
                 fetch_transactions.apply_async(
                     args=[
+                        request.user.id,
                         plaid_item.identifier,
                     ],
                     countdown=20
@@ -101,6 +102,18 @@ class ObtainAccessTokenView(APIView):
                 "message": "Validation failed.",
                 "errors": errors
             }, status=400)
+
+
+class AccountsListView(ListAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = [u'get']
+    serializer_class = AccountSerializer
+
+    def get_queryset(self):
+        accounts_qs = Account.objects.filter(
+            user=self.request.user
+        )
+        return accounts_qs
 
 
 class TransactionListView(ListAPIView):

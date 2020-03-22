@@ -102,7 +102,7 @@ def fetch_accounts_data(self, user_id, item_uuid):
 
         for account in accounts_response["accounts"]:
             # Handle appropriate filters before using get_or_create
-            account_obj, created = Account.objects.get_or_create(
+            account_obj = Account(
                 user=user,
                 item=item,
                 account_id=account["account_id"],
@@ -145,13 +145,14 @@ def fetch_accounts_data(self, user_id, item_uuid):
 
 
 @plaid_app.task(bind=True, max_retries=5)
-def fetch_transactions(self, item_uuid):
+def fetch_transactions(self, user_id, item_uuid):
     """
     Fetches different accounts transactions and stores in db
 
     Making separate calls for different accounts can reduce time running this task
     """
     client = get_plaid_client()
+    user = User.objects.get(pk=user_id)
     start_date = '{:%Y-%m-%d}'.format(timezone.now() + timedelta(-30))
     end_date = '{:%Y-%m-%d}'.format(timezone.now())
     try:
@@ -161,6 +162,7 @@ def fetch_transactions(self, item_uuid):
         for transaction in transactions_data:
             account_obj = Account.objects.get(account_id=transaction["account_id"])
             trans_obj = Transaction(
+                user=user,
                 account=account_obj,
                 transaction_id=transaction["transaction_id"],
                 category_id=transaction.get("category_id", None),
