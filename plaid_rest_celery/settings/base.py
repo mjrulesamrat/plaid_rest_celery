@@ -147,20 +147,8 @@ CELERYD_HIJACK_ROOT_LOGGER = False
 
 CELERY_TASK_CREATE_MISSING_QUEUES = True
 
-from kombu import Queue, Exchange
-
-CELERY_QUEUES = (
-    Queue('flash', Exchange('flash'), routing_key='flash'),
-    Queue('normal', Exchange('normal'), routing_key='normal'),
-    Queue('slow', Exchange('slow'), routing_key='slow'),
-)
-
-CELERY_DEFAULT_QUEUE = 'normal'
-CELERY_DEFAULT_EXCHANGE = 'normal'
-CELERY_DEFAULT_ROUTING_KEY = 'normal'
-
 # CELERY ROUTES
-CELERY_ROUTES = {
+CELERY_TASK_ROUTES = {
     'plaidapp.tasks.fetch_item_metadata': {'queue': 'flash'},
     'plaidapp.tasks.fetch_accounts_data': {'queue': 'normal'},
     'plaidapp.tasks.fetch_transactions': {'queue': 'slow'},
