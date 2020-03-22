@@ -126,9 +126,13 @@ class Transaction(TimeStampedModel):
     transaction_type = models.CharField(max_length=25)
     name = models.CharField(max_length=200)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_channel = models.CharField(max_length=50)
-    authorized_date = models.DateField(null=True, blank=True)
+    iso_currency_code = models.CharField(max_length=10)
+    unofficial_currency_code = models.CharField(
+        max_length=20, blank=True, null=True
+    )
     date = models.DateField()
+    authorized_date = models.DateField(null=True, blank=True)
+    payment_channel = models.CharField(max_length=50)
     pending = models.BooleanField()
     pending_transaction_id = models.CharField(
         max_length=50, null=True, blank=True
