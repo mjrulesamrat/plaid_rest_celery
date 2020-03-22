@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from datetime import timedelta
 
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 import structlog
 from plaid.errors import APIError, RateLimitExceededError, PlaidError
@@ -13,6 +14,8 @@ from .models import PlaidItem, ItemMetaData, Account, Balance
 
 celery_logger = structlog.get_logger("celery")
 
+User = get_user_model()
+
 
 # BTW bind=True is helpful to restart this task in case it is failed
 @plaid_app.task(
@@ -20,11 +23,12 @@ celery_logger = structlog.get_logger("celery")
     default_retry_delay=60*1,
     max_retries=2
 )
-def fetch_item_metadata(self, item_uuid):
+def fetch_item_metadata(self, user_id, item_uuid):
     """
     Fetches newly created item's meta data and stores in database
     """
     client = get_plaid_client()
+    user = User.objects.get(pk=user_id)
     try:
         item = PlaidItem.objects.get(identifier=item_uuid)
         item_response = client.Item.get(item.access_token)
@@ -32,6 +36,8 @@ def fetch_item_metadata(self, item_uuid):
         status_data = item_response["status"]
 
         item_meta_data_obj = ItemMetaData(
+            user=user,
+            item=item,
             available_products=", ".join(item_data.get("available_products")),
             billed_products=", ".join(item_data.get("billed_products")),
             item_meta_id=item_data.get("item_id"),
@@ -47,7 +53,7 @@ def fetch_item_metadata(self, item_uuid):
 
         item_meta_data_obj.save()
 
-        celery_logger.log(
+        celery_logger.info(
             "fetch_item_metadata success",
             plaid_request_id=item_response['request_id'],
             fetch_item="success"
@@ -83,17 +89,20 @@ def fetch_item_metadata(self, item_uuid):
 
 
 @plaid_app.task(bind=True, max_retries=3)
-def fetch_accounts_data(self, item_uuid):
+def fetch_accounts_data(self, user_id, item_uuid):
     """
     Fetches item's accounts and stores in db
     """
     client = get_plaid_client()
+    user = User.objects.get(pk=user_id)
     try:
         item = PlaidItem.objects.get(identifier=item_uuid)
 
         accounts_response = client.Accounts.get(item.access_token)
         for account in accounts_response["accounts"]:
             account_obj = Account(
+                user=user,
+                item=item,
                 account_id=account["account_id"],
                 mask=account["mask"],
                 name=account["name"],
@@ -114,7 +123,7 @@ def fetch_accounts_data(self, item_uuid):
             balance_obj.save()
 
         # Log event
-        celery_logger.log(
+        celery_logger.info(
             "fetch_accounts_data success",
             plaid_request_id=accounts_response['request_id'],
             fetch_accounts="success"
@@ -147,6 +156,7 @@ def fetch_transactions(self, item_uuid):
         transactions_response = client.Transactions.get(
             item.access_token, start_date, end_date
         )
+
     except PlaidError as exc:
         celery_logger.info(
             exc.display_message,

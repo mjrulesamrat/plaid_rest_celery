@@ -12,8 +12,9 @@ from plaid import Client
 import structlog
 
 from .forms import PublicTokenForm
-from .models import PlaidItem
+from .models import PlaidItem, Transaction
 from .tasks import fetch_item_metadata, fetch_accounts_data
+from .serializers import TransactionsSerializer
 
 
 plaid_logger = structlog.get_logger("plaid")
@@ -43,15 +44,16 @@ class ObtainAccessTokenView(APIView):
                     token_exchange="success"
                 )
             except PlaidError as e:
+                # ToDo: More through error handling
                 plaid_logger.info(
-                    e.display_message,
+                    "public token exchange fail",
                     public_token=form.cleaned_data["public_token"],
                     token_exchange="fail",
                     error_type=e.type,
                     error_code=e.code,
                     plaid_request_id=e.request_id
                 )
-                data = {"message": e.display_message}
+                data = {"message": e.code}
                 return Response(data, status=400)
 
             plaid_item = PlaidItem(
@@ -63,7 +65,18 @@ class ObtainAccessTokenView(APIView):
 
             # add tasks to fetch item metadata and account data
             try:
-                fetch_item_metadata.apply_async(plaid_item.identifier)
+                fetch_item_metadata.apply_async(
+                    args=[
+                        request.user.id,
+                        plaid_item.identifier,
+                    ]
+                )
+                fetch_accounts_data.apply_async(
+                    args=[
+                        request.user.id,
+                        plaid_item.identifier,
+                    ]
+                )
             except fetch_item_metadata.OperationalError as exc:
                 celery_logger.exception('Sending task raised %r', exc)
 
@@ -86,7 +99,10 @@ class ObtainAccessTokenView(APIView):
 class TransactionListView(ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = [u'get']
-    # define serializer for transactions data
+    serializer_class = TransactionsSerializer
 
     def get_queryset(self):
-        pass
+        transactions_qs = Transaction.objects.filter(
+            user=self.request.user
+        )
+        return transactions_qs

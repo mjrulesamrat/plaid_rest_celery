@@ -60,6 +60,7 @@ class Account(TimeStampedModel):
     identifier = models.UUIDField(
         default=uuid.uuid4, editable=False, unique=True
     )
+    item = models.ForeignKey(PlaidItem, on_delete=models.CASCADE, )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
