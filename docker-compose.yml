@@ -49,7 +49,7 @@ services:
 
   celery_default_worker:
     <<: *web
-    command: celery -A plaid_rest_celery worker -Q normal -c 2 --loglevel=info
+    command: celery -A plaid_rest_celery worker -Q default -c 2 --loglevel=info
     container_name: plaid_default_worker
     image: plaid_rest_image
     depends_on:
@@ -66,6 +66,16 @@ services:
       - web
       - rabbitmq
     restart: always
+
+#  flower:
+#    image: mher/flower
+#    #    environment:
+#    #      - CELERY_BROKER_URL=
+#    #      - FLOWER_PORT=8888
+#    env_file:
+#      - ./.env
+#    ports:
+#      - 8888:8888
 
 volumes:
   static_volume:

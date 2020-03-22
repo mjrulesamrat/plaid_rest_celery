@@ -59,6 +59,9 @@ def fetch_item_metadata(self, user_id, item_uuid):
             fetch_item="success"
         )
         return "Fetch Item meta-data success"
+    except PlaidItem.DoesNotExist as exc:
+        # PlaidItem is not created!
+        raise self.retry(countdown=10, exc=exc, )
     except PlaidError as exc:
         # logging error
         celery_logger.info(
@@ -132,6 +135,9 @@ def fetch_accounts_data(self, user_id, item_uuid):
             fetch_accounts="success"
         )
         return "Fetch account data success"
+    except PlaidItem.DoesNotExist as exc:
+        # PlaidItem is not created!
+        raise self.retry(countdown=10, exc=exc, )
     except PlaidError as exc:
         celery_logger.info(
             exc.display_message,
@@ -189,6 +195,9 @@ def fetch_transactions(self, user_id, item_uuid):
         )
         return "Fetch account data success"
 
+    except PlaidItem.DoesNotExist as exc:
+        # PlaidItem is not created!
+        raise self.retry(countdown=10, exc=exc, )
     except PlaidError as exc:
         if exc.code == "PRODUCT_NOT_READY":
             # try again after few minutes because transactions data is not ready
