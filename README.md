@@ -82,6 +82,13 @@ python manage.py runserver
 localhost:8000/plaid-admin/
 ```
 
+## Flower monitoring(Tested within docker)
+
+- Basic auth creds, `admin/admin` or `foo/bar`
+```
+http://localhost:7775/
+```
+
 ## API docs using [drf-yasg](https://drf-yasg.readthedocs.io/en/latest/readme.html)
 
 - You'll need to login to admin panel first to access API docs
@@ -108,6 +115,7 @@ rabbitmqctl change_password user password  # reset password
 celery -A plaid_rest_celery worker -Q flash -c 4 --loglevel=info
 celery -A plaid_rest_celery worker -Q default -c 2 --loglevel=info
 celery -A plaid_rest_celery worker -Q slow -c 2 --loglevel=info
+celery flower -A plaid_rest_celery --address=127.0.0.1 --port=7775
 ```
 
 ## Update requirements
