@@ -19,6 +19,7 @@ plaid-python = "*"
 django-extensions = "*"
 django-structlog = "*"
 sentry-sdk = "*"
+psycopg2 = "*"
 
 [requires]
 python_version = "3.6"

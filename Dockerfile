@@ -13,8 +13,8 @@ WORKDIR /usr/src/plaid
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# install dependencies
-RUN apk update && apk add gcc python3-dev musl-dev
+# install psycopg2 dependencies
+RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev
 
 # install dependencies
 COPY ./requirements.txt .
@@ -42,7 +42,7 @@ RUN mkdir $APP_HOME/assets
 WORKDIR $APP_HOME
 
 # install dependencies
-RUN apk update
+RUN apk update && apk add libpq
 COPY --from=builder /usr/src/plaid/wheels /wheels
 COPY --from=builder /usr/src/plaid/requirements.txt .
 RUN pip install --upgrade pip

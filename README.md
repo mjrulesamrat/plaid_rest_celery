@@ -14,6 +14,8 @@ chmod +x app/entrypoint.sh
 # most of default should work fine for quick demo except plaid keys & sentry
 cp .env.example .env
 
+cp plaid_rest_celery/settings/example-staging.py plaid_rest_celery/settings/staging.py
+
 docker-compose up -d --build
 
 docker-compose exec web python manage.py migrate --noinput
@@ -21,6 +23,9 @@ docker-compose exec web python manage.py migrate --noinput
 docker-compose exec web python manage.py createsuperuser
 
 docker-compose exec web python manage.py collectstatic --noinput
+
+# Cleanup:
+docker-compose down -v  # down and remove volumes
 ```
 
 ## Local Installation Guideline:
@@ -127,7 +132,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"username": "admin", "pass
 * response (Use this token in further requests)
 
 ```
-{"auth_token":"036235d3eb26bab988a38e473db3f64cf113fc01"}
+{"auth_token":"dddad1111Example_token8218132251b"}
 ```
 
 ## 2. Get public token of customer from plaid
@@ -161,5 +166,4 @@ curl -X POST -H "Authorization: Token dddad1111Example_token8218132251b" http://
 ## 6. Logout
 ```
 curl -X POST -H "Authorization: Token dddad1111Example_token8218132251b" http://localhost:8000/api/v1/auth/token/logout/
-
 ```
