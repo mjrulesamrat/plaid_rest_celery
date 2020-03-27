@@ -105,7 +105,7 @@ celery -A plaid_rest_celery worker -Q default -c 2 --loglevel=info
 celery -A plaid_rest_celery worker -Q slow -c 2 --loglevel=info
 ```
 
-## Update requirements for staging
+## Update requirements
 
 Update requirements from Pipfile to `requirements.txt`. Everytime we do `pipenv install`, make sure to update `requirements.txt`
 
@@ -114,3 +114,52 @@ Update requirements from Pipfile to `requirements.txt`. Everytime we do `pipenv 
 ## Logging
 
 - Go to logs [README](logs/README.md)
+
+# Testing guidelines
+
+## 1. Login(Token authentication)
+
+* Get access-token
+```
+curl -X POST -H "Content-Type: application/json" -d '{"username": "admin", "password": "admin"}' http://localhost:8000/api/v1/auth/token/login/
+```
+
+* response (Use this token in further requests)
+
+```
+{"auth_token":"036235d3eb26bab988a38e473db3f64cf113fc01"}
+```
+
+## 2. Get public token of customer from plaid
+
+* Get Public token by running sandbox [plaid-python-quickstart](https://github.com/plaid/quickstart/tree/master/python)
+
+## 3. Create an Item
+
+* Send public token to create new item (Add user's plaid account)
+
+```
+curl -X POST -H "Authorization: Token dddad1111Example_token8218132251b" -d '{"public_token": "token"}' http://localhost:8000/api/v1/plaid/create-item/
+```
+
+## 4. Let the magic happen!
+
+* background celery tasks will fetch access_token and item_id
+
+* Then, it'll fetch and save item metadata
+
+* then, it'll fetch and save accounts for given item
+
+* At last, it'll fetch last 30 days transactions data for given item
+
+## 5. Get transactions
+
+```
+curl -X POST -H "Authorization: Token dddad1111Example_token8218132251b" http://localhost:8000/api/v1/plaid/transactions/
+```
+
+## 6. Logout
+```
+curl -X POST -H "Authorization: Token dddad1111Example_token8218132251b" http://localhost:8000/api/v1/auth/token/logout/
+
+```
