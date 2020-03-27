@@ -76,15 +76,18 @@ services:
       - rabbitmq
     restart: always
 
-#  flower:
-#    image: mher/flower
-#    #    environment:
-#    #      - CELERY_BROKER_URL=
-#    #      - FLOWER_PORT=8888
-#    env_file:
-#      - ./.env
-#    ports:
-#      - 8888:8888
+  flower:
+    image: mher/flower
+    #    environment:
+    #      - CELERY_BROKER_URL=
+    #      - FLOWER_PORT=8888
+    env_file:
+      - ./.env
+    ports:
+      - 7775:8888
+    depends_on:
+      - web
+      - rabbitmq
 
 volumes:
   postgres_data:
